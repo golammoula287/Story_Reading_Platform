@@ -1,0 +1,40 @@
+{
+  "name": "storyhaven",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web,worker \"npm run dev -w @storyhaven/api\" \"npm run dev -w @storyhaven/web\" \"npm run worker -w @storyhaven/api\"",
+    "build": "npm run build -w @storyhaven/api && npm run build -w @storyhaven/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @storyhaven/api",
+    "test:e2e": "playwright test",
+    "db:local": "node scripts/local-db.mjs",
+    "seed": "npm run seed -w @storyhaven/api",
+    "admin:create": "npm run admin:create -w @storyhaven/api",
+    "package:milestone": "node scripts/package-milestone.mjs",
+    "format": "prettier --write apps packages scripts tests infra docs *.md *.json",
+    "format:check": "prettier --check apps packages scripts tests infra docs *.md *.json",
+    "start": "concurrently -k -n api,web,worker \"npm run start -w @storyhaven/api\" \"npm run start -w @storyhaven/web\" \"npm run worker:start -w @storyhaven/api\""
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.6.2",
+    "concurrently": "10.0.5",
+    "esbuild": "0.28.2",
+    "prettier": "3.9.9",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "1.2.10"
+  }
+}
