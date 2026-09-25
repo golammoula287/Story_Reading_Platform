@@ -14,8 +14,11 @@ import { adminRouter } from './modules/admin.js';
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
-  // Loopback proxy only. Public API should remain bound to the private interface.
-  app.set('trust proxy', 'loopback');
+  const isBehindProxy =
+    process.env.RENDER === 'true' ||
+    Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_STATIC_URL) ||
+    process.env.NODE_ENV === 'production';
+  app.set('trust proxy', isBehindProxy ? 1 : 'loopback');
   app.use(helmet());
   app.use((_req, res, next) => {
     res.setHeader('X-Request-Id', randomUUID());

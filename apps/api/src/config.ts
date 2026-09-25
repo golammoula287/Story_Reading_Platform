@@ -7,13 +7,38 @@ import { fileURLToPath } from 'node:url';
 // the monorepo root, the API directory, or the production dist directory.
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 dotenv.config({ path: path.join(apiRoot, '.env'), quiet: true });
-// Railway assigns the externally routed port through PORT. Local development
-// continues to use API_PORT so the two environments remain explicit.
+const isRender = process.env.RENDER === 'true';
+const isRailway = Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_STATIC_URL);
+const isCloudContainer =
+  isRender || isRailway || Boolean(process.env.FLY_APP_NAME) || Boolean(process.env.K_SERVICE);
+
+// In cloud container platforms (Render, Railway, etc.), the host assigns PORT.
+// For local development, API_PORT takes precedence.
+const rawPort = isCloudContainer
+  ? (process.env.PORT ?? process.env.API_PORT)
+  : (process.env.API_PORT ?? process.env.PORT);
+
+const rawHost = process.env.API_HOST ?? process.env.HOST;
+
+// Cloud containers and production default to 0.0.0.0 so reverse proxies and port detectors can route traffic.
+const defaultApiHost =
+  process.env.NODE_ENV === 'production' || isCloudContainer || Boolean(process.env.PORT)
+    ? '0.0.0.0'
+    : '127.0.0.1';
+
+let resolvedApiHost = rawHost ?? defaultApiHost;
+
+// In cloud containers (like Render), binding to 127.0.0.1 or localhost prevents the platform's
+// router and port scanner from detecting the service. Normalize loopback to 0.0.0.0.
+if (isCloudContainer && (resolvedApiHost === '127.0.0.1' || resolvedApiHost === 'localhost')) {
+  resolvedApiHost = '0.0.0.0';
+}
+
 const runtimeEnv: NodeJS.ProcessEnv = {
   ...process.env,
-  API_PORT: process.env.API_PORT ?? process.env.PORT,
+  API_PORT: rawPort,
+  API_HOST: resolvedApiHost,
 };
-const defaultApiHost = runtimeEnv.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(4000),

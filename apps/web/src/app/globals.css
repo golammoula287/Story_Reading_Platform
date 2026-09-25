@@ -767,7 +767,8 @@ hr {
   font-size: 14px;
 }
 .filter-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(150px, 1fr) minmax(170px, 1fr) auto;
   gap: 12px;
   margin: 22px 0;
   background: #eff1e8;
@@ -776,12 +777,10 @@ hr {
   padding: 15px;
   align-items: center;
 }
-.filter-bar label {
-  flex: 1;
-  min-width: 0;
-}
+.filter-bar label,
 .filter-bar .search-field {
-  flex: 1.7;
+  min-width: 0;
+  width: 100%;
 }
 .search-field {
   display: flex;
@@ -797,8 +796,16 @@ hr {
   background: none;
   min-width: 0;
 }
+.search-field input:focus,
+.search-field input:focus-visible {
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+}
 .search-field:focus-within {
-  outline: 2px solid #789e61;
+  border-color: #688b64;
+  box-shadow: 0 0 0 3px #638b6420;
+  outline: none;
 }
 .results-heading {
   display: flex;
