@@ -1,11 +1,13 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { BookOpen, Library, Search, ArrowUpRight, LogOut } from 'lucide-react';
 import { useSession } from './session';
 export function Navigation() {
   const { user, loading, logout } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isTrending = pathname === '/discover' && searchParams.get('view') === 'trending';
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -18,12 +20,16 @@ export function Navigation() {
         </Link>
         <nav aria-label="Main navigation">
           <Link
-            className={pathname === '/' || pathname.startsWith('/discover') ? 'active' : ''}
+            className={
+              !isTrending && (pathname === '/' || pathname.startsWith('/discover')) ? 'active' : ''
+            }
             href="/discover"
           >
             Discover
           </Link>
-          <Link href="/discover?view=trending">Trending</Link>
+          <Link className={isTrending ? 'active' : ''} href="/discover?view=trending">
+            Trending
+          </Link>
           <Link href="/library">
             <Library size={16} /> My library
           </Link>

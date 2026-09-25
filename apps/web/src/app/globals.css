@@ -1726,13 +1726,10 @@ tbody tr:last-child td {
     margin-left: 0;
   }
   .filter-bar {
-    flex-wrap: wrap;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .filter-bar .search-field {
-    flex: 1 1 100%;
-  }
-  .filter-bar label {
-    flex-basis: 30%;
+    grid-column: 1 / -1;
   }
   .story-detail {
     grid-template-columns: 200px 1fr;
@@ -1969,11 +1966,12 @@ tbody tr:last-child td {
     font-size: 12px;
   }
   .filter-bar {
+    grid-template-columns: minmax(0, 1fr);
     padding: 12px;
     gap: 10px;
   }
-  .filter-bar label {
-    flex: 1 1 100%;
+  .filter-bar .search-field {
+    grid-column: auto;
   }
   .filter-bar .button {
     width: 100%;
