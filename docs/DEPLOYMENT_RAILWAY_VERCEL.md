@@ -73,7 +73,7 @@ Use the same Atlas URI as the API. The worker runs scheduled chapter publication
 
 ## Vercel web service
 
-Import the same GitHub repository into Vercel. Set **Root Directory** to `apps/web` and enable source files outside the root directory, because `packages/contracts` is shared with the API.
+Import the same GitHub repository into Vercel. Set **Root Directory** to `apps/web` and enable source files outside the root directory, because `packages/contracts` is shared with the API. The web app maps `@/*` directly to `apps/web/src`, so component and library imports resolve consistently in Vercel builds.
 
 Set these Production environment variables before deploying:
 
