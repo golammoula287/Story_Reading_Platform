@@ -36,6 +36,7 @@ if (isCloudContainer && (resolvedApiHost === '127.0.0.1' || resolvedApiHost === 
 
 const runtimeEnv: NodeJS.ProcessEnv = {
   ...process.env,
+  NODE_ENV: isCloudContainer ? 'production' : process.env.NODE_ENV,
   API_PORT: rawPort,
   API_HOST: resolvedApiHost,
 };
