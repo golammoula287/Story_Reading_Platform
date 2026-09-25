@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { SessionProvider } from '@/components/session';
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <a className="skip-link" href="#main">
             Skip to content
           </a>
-          <Navigation />
+          <Suspense fallback={null}>
+            <Navigation />
+          </Suspense>
           <main id="main">{children}</main>
           <footer className="site-footer container">
             <div>
