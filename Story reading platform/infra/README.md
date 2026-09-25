@@ -8,4 +8,6 @@ Production deployment remains Phase 3. Its required processes are `node apps/api
 
 See [environment configuration](ENVIRONMENT.md) for the separate API and web configuration required locally and in hosting.
 
+For the supported hosted topology, see [Railway + Vercel deployment](../docs/DEPLOYMENT_RAILWAY_VERCEL.md).
+
 Cover files are generated WebP images beneath `.local/uploads` by default. Database and media are excluded from milestone source archives. Backup, restore automation and production deployment are deliberately tracked in Phase 3, not represented as completed here.

@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 // the monorepo root, the API directory, or the production dist directory.
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 dotenv.config({ path: path.join(apiRoot, '.env'), quiet: true });
+// Railway assigns the externally routed port through PORT. Local development
+// continues to use API_PORT so the two environments remain explicit.
+const runtimeEnv = { ...process.env, API_PORT: process.env.API_PORT ?? process.env.PORT };
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(4000),
@@ -21,7 +24,7 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_REDIRECT_URI: z.url().default('http://localhost:3000/api/v1/auth/google/callback'),
 });
-export const config = schema.parse(process.env);
+export const config = schema.parse(runtimeEnv);
 if (config.NODE_ENV === 'production' && !config.WEB_ORIGIN.startsWith('https://'))
   throw new Error('Production requires HTTPS WEB_ORIGIN');
 export const mediaDir = path.resolve(apiRoot, config.MEDIA_DIR);

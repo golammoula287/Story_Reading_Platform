@@ -12,6 +12,9 @@
   "scripts": {
     "dev": "concurrently -k -n api,web,worker \"npm run dev -w @storyhaven/api\" \"npm run dev -w @storyhaven/web\" \"npm run worker -w @storyhaven/api\"",
     "build": "npm run build -w @storyhaven/api && npm run build -w @storyhaven/web",
+    "build:api": "npm run build -w @storyhaven/api",
+    "start:api": "npm run start -w @storyhaven/api",
+    "start:worker": "npm run worker:start -w @storyhaven/api",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test -w @storyhaven/api",
     "test:e2e": "playwright test",
@@ -21,7 +24,7 @@
     "package:milestone": "node scripts/package-milestone.mjs",
     "format": "prettier --write apps packages scripts tests infra docs *.md *.json",
     "format:check": "prettier --check apps packages scripts tests infra docs *.md *.json",
-    "start": "concurrently -k -n api,web,worker \"npm run start -w @storyhaven/api\" \"npm run start -w @storyhaven/web\" \"npm run worker:start -w @storyhaven/api\""
+    "start": "concurrently -k -n api,web,worker \"npm run start:api\" \"npm run start -w @storyhaven/web\" \"npm run start:worker\""
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

@@ -10,7 +10,7 @@ Current status: **Phase 1 local build and tested workflows pass; live external c
 
 The user has resumed work and authorized completing the remaining checks one by one. On 2026-09-24, `npm run build`, `npm run typecheck`, and all 15 MongoDB integration tests passed from the relocated root. The built website/API run locally through `npm start`; the database runs through `npm run db:local`. Desktop/mobile discovery and the reader browser journey passed. The admin journey passed after changing its test locator to the accessible status combobox; no app fix was required. All three browser journeys now have passing evidence across the initial run and focused rerun.
 
-See [Milestone 1 report](docs/MILESTONE_1.md) for exact coverage and limits. Source handover is generated in `releases/` by `npm run package:milestone`, with archive/file checksums. Temporary browser-test accounts are removed; no permanent administrator account was provisioned for the user. Real Google Sign-In and rewarded-ad callback proof are not verified without client-owned accounts/credentials. Do not describe the whole milestone as contractually accepted.
+See [Milestone 1 report](docs/MILESTONE_1.md) for exact coverage and limits. Source handover is generated in `releases/` by `npm run package:milestone`, with archive/file checksums. Temporary browser-test accounts are removed; a permanent administrator account was provisioned for the user. Atlas connectivity has been verified. Production-domain Google Sign-In and rewarded-ad callback proof remain pending. Do not describe the whole milestone as contractually accepted.
 
 ## Read order and authority
 
@@ -106,10 +106,14 @@ These items did not block preparation of the plan. They block only their depende
 
 ## Next action
 
-Next external step: guide the user through configuring a client-owned Google OAuth web client using the existing README instructions, then test the real flow. Keep secrets in ignored `apps/api/.env` only. Resolve rewarded-ad provider feasibility and client review before declaring Phase 1 fully accepted. No need to rerun passing local checks unless code or configuration changes. Do not begin Phase 2 without the user?s direction.
+Next external step: deploy the frontend to Vercel and the separate API/worker to Railway using `docs/DEPLOYMENT_RAILWAY_VERCEL.md`, then test the real Google flow against the public Vercel callback URL. Atlas connectivity was verified from the backend configuration on 2026-09-25 without logging credentials. Keep secrets in ignored `apps/api/.env` locally and in host-managed variables in production. Resolve rewarded-ad provider feasibility and client review before declaring Phase 1 fully accepted. No need to rerun passing local checks unless code or configuration changes. Do not begin Phase 2 without the user?s direction.
 
 After each implementation session update: current subphase, changed files, actual commands/test results, decisions and their source, open defects/blockers, milestone delivery/acceptance status, and the next concrete task. Preserve unresolved items until evidence resolves them.
 
 ## Local environment setup
 
 Environment configuration is separated for hosting: ignored `apps/api/.env` holds API/database/media/Google/admin settings; ignored `apps/web/.env.local` holds the Next.js API route target and public site label. Each app has a committed `.env.example` template. The root `.env` files were removed to prevent accidental secret sharing between services. Google client ID/secret and administrator provisioning fields are intentionally blank for the user to fill locally. No real credentials were supplied or logged. `npm run typecheck` and `npm run build` passed after this configuration change; Next.js confirmed it loaded `apps/web/.env.local`. Restart the relevant app after changing its configuration.
+
+## Cloud deployment preparation
+
+MongoDB Atlas is configured and a read-only backend connection check passed on 2026-09-25. Railway compatibility now maps Railway's `PORT` to the API's validated port when `API_PORT` is not set. Added root commands for the independent API and worker services, Node runtime pinning, and `docs/DEPLOYMENT_RAILWAY_VERCEL.md`. Production deployment itself remains pending client-owned Railway, Vercel, GitHub and domain access plus the public domains needed for `WEB_ORIGIN` and Google OAuth configuration.
