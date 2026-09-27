@@ -1,9 +1,11 @@
 import type { NextConfig } from 'next';
 import path from 'node:path';
+import { apiOrigin } from './api-origin.mjs';
 import { fileURLToPath } from 'node:url';
 
 // Next.js automatically loads apps/web/.env.local and the appropriate
 // environment-specific file. Only NEXT_PUBLIC_ values may reach the browser.
+const backendOrigin = apiOrigin();
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {
   transpilePackages: ['@storyhaven/contracts'],
@@ -23,7 +25,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.API_INTERNAL_URL || 'http://127.0.0.1:4000'}/api/:path*`,
+        destination: `${backendOrigin}/api/:path*`,
       },
     ];
   },

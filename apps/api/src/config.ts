@@ -48,7 +48,23 @@ const schema = z.object({
     .string()
     .startsWith('mongodb')
     .default('mongodb://127.0.0.1:27018/storyhaven?replicaSet=storyhaven'),
-  WEB_ORIGIN: z.url().default('http://localhost:3000'),
+  WEB_ORIGIN: z
+    .string()
+    .trim()
+    .pipe(z.url())
+    .default('http://localhost:3000')
+    .refine((value) => {
+      const url = new URL(value);
+      return (
+        ['http:', 'https:'].includes(url.protocol) &&
+        !url.username &&
+        !url.password &&
+        url.pathname === '/' &&
+        !url.search &&
+        !url.hash
+      );
+    }, 'WEB_ORIGIN must be the frontend origin without a path, query or credentials.')
+    .transform((value) => new URL(value).origin),
   MEDIA_DIR: z.string().default('../../.local/uploads'),
   GOOGLE_CLIENT_ID: z.string().default(''),
   GOOGLE_CLIENT_SECRET: z.string().default(''),

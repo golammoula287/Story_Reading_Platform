@@ -1,3 +1,4 @@
+import { apiOrigin } from '../../api-origin.mjs';
 export class HttpError extends Error {
   constructor(
     public status: number,
@@ -34,10 +35,10 @@ export function message(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 }
 export async function publicApi<T>(path: string): Promise<T> {
-  const res = await fetch(
-    `${process.env.API_INTERNAL_URL || 'http://127.0.0.1:4000'}/api/v1${path}`,
-    { cache: 'no-store', signal: AbortSignal.timeout(8000) },
-  );
+  const res = await fetch(`${apiOrigin()}/api/v1${path}`, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(8000),
+  });
   if (!res.ok)
     throw new HttpError(res.status, 'REQUEST_FAILED', 'The catalogue is temporarily unavailable.');
   return res.json();
