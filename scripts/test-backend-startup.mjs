@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import assert from 'node:assert/strict';
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 let health = 0,
   catalogueAfterReady = 0,
   posts = 0;
@@ -53,9 +53,9 @@ try {
   browser = await chromium.launch();
   const page = await browser.newPage();
   await page.goto('http://localhost:3100/');
-  await page.getByRole('heading', { name: 'Getting your stories ready' }).waitFor();
-  await page.locator('.backend-startup').waitFor({ state: 'detached', timeout: 20000 });
-  await page.waitForTimeout(1000);
+  await expect(page.getByRole('link', { name: 'Find your next read' })).toBeVisible();
+  assert.equal(await page.locator('.backend-startup').count(), 0, 'no blocking startup overlay');
+  await expect.poll(() => catalogueAfterReady, { timeout: 20000 }).toBeGreaterThan(0);
   assert.ok(health >= 3, 'frontend itself woke the backend');
   assert.ok(catalogueAfterReady > 0, 'server catalogue refreshed after readiness');
   await page.goto('http://localhost:3100/sign-in');
@@ -66,7 +66,7 @@ try {
   await page.getByRole('alert').filter({ hasText: 'temporarily unavailable' }).waitFor();
   await page.waitForTimeout(2500);
   assert.equal(posts, 1, 'a failed form submission must not be replayed');
-  console.log('PASS: startup overlay, backend wake-up, catalogue recovery, and no repeated POST.');
+  console.log('PASS: visible homepage without overlay, backend wake-up, catalogue recovery, and no repeated POST.');
 } finally {
   await browser?.close();
   web.kill();

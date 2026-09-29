@@ -2188,14 +2188,3 @@ tbody tr:last-child td {
     animation: none !important;
   }
 }
-
-.backend-startup {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: var(--bg, #faf9f6);
-}
-.backend-startup-card { max-width: 480px; text-align: center; }
