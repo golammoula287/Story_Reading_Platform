@@ -34,3 +34,5 @@ The frontend now provides /backend-status, which checks the backend /health endp
 Deploy the updated frontend code and rebuild it. No new environment variable is needed: API_INTERNAL_URL must remain the backend's public HTTPS origin on Render's free tier. Test after idle by opening only the frontend URL. For consistently immediate production responses, use backend compute that does not sleep; frontend recovery cannot eliminate the hosting startup delay.
 
 Verification commands: node --test scripts/backend-ready.test.mjs; npm run build -w @storyhaven/web; node scripts/test-backend-startup.mjs. The browser check runs simulated backend/frontend services locally on ports 4000/3100 and uses no database or live accounts. Run it from the repository root after building the frontend with a local API target.
+
+For persistent Cloudinary cover uploads and restoring the demo images, follow [Cloudinary setup](CLOUDINARY.md).

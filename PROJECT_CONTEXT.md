@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-09-24.
+Last updated: 2026-09-29.
 
 ## Purpose and current instruction
 
@@ -106,7 +106,7 @@ These items did not block preparation of the plan. They block only their depende
 
 ## Next action
 
-Next external step: deploy the frontend to Vercel and the separate API/worker to Railway using `docs/DEPLOYMENT_RAILWAY_VERCEL.md`, then test the real Google flow against the public Vercel callback URL. Atlas connectivity was verified from the backend configuration on 2026-09-25 without logging credentials. Keep secrets in ignored `apps/api/.env` locally and in host-managed variables in production. Resolve rewarded-ad provider feasibility and client review before declaring Phase 1 fully accepted. No need to rerun passing local checks unless code or configuration changes. Do not begin Phase 2 without the user?s direction.
+Next external step: deploy both frontend and separate Express API to Vercel using `docs/DEPLOYMENT_VERCEL.md`, as requested on 2026-09-29. Configure the two projects' production origins, Atlas, Cloudinary and cron credentials; verify live authentication, cover persistence and cron before switching traffic. The earlier Railway/Render guides remain historical alternatives. Atlas connectivity was verified on 2026-09-25 without logging credentials. Keep secrets in ignored local environment files and host-managed production variables. Resolve rewarded-ad provider feasibility and client review before declaring Phase 1 accepted; do not begin Phase 2 without direction.
 
 After each implementation session update: current subphase, changed files, actual commands/test results, decisions and their source, open defects/blockers, milestone delivery/acceptance status, and the next concrete task. Preserve unresolved items until evidence resolves them.
 
@@ -142,3 +142,21 @@ Verified both public story pages return 200, ordered chapter metadata matches th
 User reports frontend fails until backend Render URL is opened manually. Existing SSR API requests abort after eight seconds; browser failures did not recover. Added frontend /backend-status health proxy (8-second bounded upstream fetch), shared browser readiness checks (two-minute total deadline), startup/error/retry overlay, catalogue refresh and session refresh on readiness. Browser API calls await readiness without replaying mutations. No periodic keep-alive and no business logic moved out of Express. Existing seed changes remain intact.
 
 Validation: five readiness regression tests passed, frontend production build including TypeScript passed, and Chromium against a simulated sleeping backend passed startup display, automatic readiness, server catalogue recovery and exactly one POST on a failed form submission. The browser harness was corrected to start Next from apps/web, matching npm workspace start. No production data changed. Redeploy/rebuild frontend to activate; live idle-start behavior remains to be checked after deployment. Render free-service spin-down/startup delay itself is unchanged.
+
+## Cloudinary integration (2026-09-29)
+
+User selected Cloudinary for persistent covers. Implemented authenticated backend REST uploads after existing image validation/600x900 WebP conversion. MEDIA_STORAGE selects local or cloudinary; cloud mode requires all three Cloudinary credentials. Added MongoDB MediaAsset mappings so existing cover-key URLs redirect to persisted Cloudinary images; local covers remain readable. Admin cover validation accepts durable mappings. Secrets are backend-only; empty placeholders added to ignored apps/api/.env and committed apps/api/.env.example. No real Cloudinary credentials were present during verification.
+
+Added docs/CLOUDINARY.md and RESTORE_DEMO_COVERS=true mode in hosted seeder to restore the six known covers from original files. Restoration checks the deployed admin storage endpoint is cloudinary before replacing covers, and does not change chapter text. Asset cleanup is separate; switching storage does not delete existing cloud images.
+
+Validation: all 20 API tests passed against a dedicated local database, including five mocked Cloudinary tests for authenticated upload/mapping, failures, external URL rejection, cover validation without disk files, and persisted redirect delivery. Real Cloudinary upload, hosted deployment and cover restoration remain pending account credentials and backend deployment. Local mode is retained until explicitly configured; no production media was changed.
+
+## Both apps on Vercel (2026-09-29)
+
+User explicitly requested complete Vercel deployment setup for backend and frontend. Added per-app vercel.json configurations and docs/DEPLOYMENT_VERCEL.md covering two projects, workspace installation, secrets, stable origins, Google callbacks, Atlas networking, Cloudinary, cron, previews, live checks and rollback. Backend api/index.js loads the esbuild-generated Express entry without starting a listener or timer worker. MongoDB connections are reused; requests wait for connection/model initialization and return sanitized no-store 503 responses on failure. Existing chapter/CSRF authorization remains in Express. MongoDB-backed API/login rate limits preserve counters across instances and cold starts. Cloudinary and a strong cron secret are required on Vercel; cover upload limit is 4 MiB there due to the platform payload ceiling, while other hosts retain 5 MiB.
+
+Publishing uses authenticated GET /internal/publishing calling the existing idempotent service. Default cron is daily for Hobby compatibility; the guide gives the per-minute paid-plan setting. Existing read-time publication/free-date checks remain authoritative; stored admin status may lag until cron. This is the requested hosting deviation from the VPS proposal, not acceptance of the full Phase 3 scope. Added .vercelignore, ignored .vercel metadata, and excluded Vercel caches from milestone packages. Existing Cloudinary/demo changes were preserved.
+
+Verification: npm run build passed (API, worker, serverless bundle and Next.js); npm run typecheck passed. All 27 Vitest tests passed with process workers, including the existing 15 database journeys, five media tests, five serverless authorization/failure tests and two real-MongoDB rate-limit concurrency/expiry tests. Local runner explicitly used storyhaven_vercel_test and storyhaven_rate_limit_test; no Atlas data was touched. Initial sandbox process spawning failed; thread-worker database suites timed out even outside the sandbox, and rerunning with the default process pool and one worker passed. A separate smoke test imported the actual built api/index.js with VERCEL=1 and an isolated storyhaven_vercel_smoke_test database, confirming health, anonymous chapter denial, cron authentication and the 31st auth attempt returning 429. Test databases were cleaned. git diff --check passed.
+
+Not yet verified: Vercel-hosted build/routing/cookies, live cron invocation, production Google OAuth and actual Cloudinary credentials/uploads. No deployment or dashboard changes were performed because no Vercel account connection is available in this session. Next: import both projects using the guide, supply production variables, deploy API then frontend, and run the listed live checks before moving traffic. Phase 1 external checks/client acceptance remain pending; Phase 2 remains unstarted.

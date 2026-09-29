@@ -1,5 +1,7 @@
 # MERN Architecture — Serial-Fiction Platform
 
+Deployment update (2026-09-29): the user requested both apps on Vercel. [The Vercel setup](docs/DEPLOYMENT_VERCEL.md) uses two projects, the existing frontend API rewrite, a separate Express function with reused MongoDB connections/shared rate limits, Cloudinary covers, and authenticated cron calls to the existing publishing service. The original VPS design below remains the contractual baseline; this hosting change does not establish final milestone acceptance.
+
 Status: proposed implementation design derived from the contract. Required stack: MongoDB + Express + React/Next.js + Node.js. TypeScript, the repository layout, session mechanics and implementation defaults below are proposed choices, not additional contract clauses. Installed Phase 1 versions are pinned in manifests and the lockfile.
 
 ## 1. System structure

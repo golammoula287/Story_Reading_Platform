@@ -1,6 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OAuth2Client, CodeChallengeMethod } from 'google-auth-library';
 import { rateLimit } from 'express-rate-limit';
+import { deploymentRateLimitStore } from '../rate-limit-store.js';
 import { loginSchema, registerSchema, type UserDto } from '@storyhaven/contracts';
 import { User, Session, OAuthState } from '../models.js';
 import { config } from '../config.js';
@@ -72,6 +73,7 @@ export function checkOrigin(req: Request, _res: Response, next: NextFunction) {
 }
 export const authRouter = Router();
 const loginLimit = rateLimit({
+  store: deploymentRateLimitStore('auth'),
   windowMs: 15 * 60000,
   limit: 30,
   standardHeaders: 'draft-8',

@@ -4,8 +4,8 @@ import { z } from 'zod';
 import multer from 'multer';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
-import { mkdir, access } from 'node:fs/promises';
-import path from 'node:path';
+import { saveCover, coverExists } from './media.js';
+import { config } from '../config.js';
 import { storySchema, chapterSchema, taxonomySchema, objectId } from '@storyhaven/contracts';
 import {
   Audit,
@@ -24,9 +24,9 @@ import {
 import { requireAdmin } from './auth.js';
 import { chapterDto, storyDto } from './content.js';
 import { ApiError, pagination, pageResult, tokens } from '../lib.js';
-import { mediaDir } from '../config.js';
 export const adminRouter = Router();
 adminRouter.use(requireAdmin);
+adminRouter.get('/media/storage', (_req, res) => res.json({ provider: config.MEDIA_STORAGE }));
 const audit = (actorId: string, action: string, targetId: string) =>
   Audit.create({ actorId, action, targetId });
 async function existingStory(id: unknown) {
@@ -41,9 +41,7 @@ async function validateStory(data: z.infer<typeof storySchema>) {
   )
     throw new ApiError(400, 'TAXONOMY', 'Choose existing, distinct taxonomy values.');
   if (data.coverKey) {
-    try {
-      await access(path.join(mediaDir, data.coverKey));
-    } catch {
+    if (!(await coverExists(data.coverKey))) {
       throw new ApiError(400, 'COVER', 'Please upload the cover first.');
     }
   }
@@ -298,7 +296,7 @@ adminRouter.get('/users/:id/activity', async (req, res) => {
 });
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  limits: { fileSize: (process.env.VERCEL === '1' ? 4 : 5) * 1024 * 1024, files: 1 },
 });
 adminRouter.post('/media', upload.single('cover'), async (req, res) => {
   if (!req.file) throw new ApiError(400, 'UPLOAD', 'Choose a cover image.');
@@ -315,9 +313,8 @@ adminRouter.post('/media', upload.single('cover'), async (req, res) => {
   } catch {
     throw new ApiError(400, 'IMAGE', 'Use a valid JPEG, PNG or WebP image under 25 megapixels.');
   }
-  await mkdir(mediaDir, { recursive: true });
   const key = `${randomUUID()}.webp`;
-  await sharp(buffer).toFile(path.join(mediaDir, key));
+  await saveCover(key, buffer);
   await audit(req.user!.id, 'cover.upload', key);
   res.status(201).json({ key, width: 600, height: 900 });
 });

@@ -73,30 +73,31 @@ export function previewText(body: string, mode: string, value: number) {
 }
 export function errorHandler(error: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (error instanceof z.ZodError)
-    return res
-      .status(400)
-      .json({
-        error: {
-          code: 'VALIDATION',
-          message: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
-        },
-      });
+    return res.status(400).json({
+      error: {
+        code: 'VALIDATION',
+        message: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+      },
+    });
   if (error instanceof ApiError)
     return res.status(error.status).json({ error: { code: error.code, message: error.message } });
   const err = error as { code?: unknown; name?: string; type?: string };
   if (err.code === 11000)
-    return res
-      .status(409)
-      .json({
-        error: {
-          code: 'CONFLICT',
-          message: 'This record already exists. Use a different email, slug or order.',
-        },
-      });
+    return res.status(409).json({
+      error: {
+        code: 'CONFLICT',
+        message: 'This record already exists. Use a different email, slug or order.',
+      },
+    });
   if (err.name === 'MulterError')
     return res
       .status(400)
-      .json({ error: { code: 'UPLOAD', message: 'Choose one image no larger than 5 MB.' } });
+      .json({
+        error: {
+          code: 'UPLOAD',
+          message: `Choose one image no larger than ${process.env.VERCEL === '1' ? 4 : 5} MB.`,
+        },
+      });
   if (err.type === 'entity.too.large' || err.type === 'entity.parse.failed')
     return res
       .status(400)

@@ -87,3 +87,6 @@ See [Milestone 1 review](docs/MILESTONE_1.md), [decisions and provider investiga
 ## Deploy to Railway and Vercel
 
 The production topology is Vercel for `apps/web`, Railway for the separate API and publishing worker, and MongoDB Atlas for data. Follow the exact service settings, environment variables, OAuth callback configuration and verification sequence in [the Railway + Vercel deployment guide](docs/DEPLOYMENT_RAILWAY_VERCEL.md). Never upload either local `.env` file.
+## Vercel deployment
+
+For both frontend and backend on Vercel, follow [the complete two-project setup](docs/DEPLOYMENT_VERCEL.md). It covers environment variables, Atlas, Cloudinary, Google callbacks, publishing cron, verification and rollback.

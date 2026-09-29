@@ -20,6 +20,7 @@ const entries = [
   'tsconfig.base.json',
   'playwright.config.ts',
   '.gitignore',
+  '.vercelignore',
   '.prettierrc.json',
   '.prettierignore',
   'README.md',
@@ -31,6 +32,7 @@ const entries = [
 const denied = new Set([
   'node_modules',
   '.next',
+  '.vercel',
   'dist',
   '.local',
   'coverage',

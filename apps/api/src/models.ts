@@ -125,3 +125,15 @@ export const Audit = model(
   'Audit',
   new Schema({ actorId: ref('User'), action: String, targetId: String }, options),
 );
+
+export const MediaAsset = model(
+  'MediaAsset',
+  new Schema(
+    {
+      key: { type: String, required: true, unique: true },
+      publicId: { type: String, required: true },
+      url: { type: String, required: true },
+    },
+    options,
+  ),
+);

@@ -7,7 +7,7 @@ const apiRoot = process.cwd();
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(await readFile(path.join(apiRoot, 'package.json'), 'utf8'));
 await build({
-  entryPoints: ['src/server.ts', 'src/workers/publishing.ts'],
+  entryPoints: ['src/server.ts', 'src/workers/publishing.ts', 'src/vercel.ts'],
   outdir: 'dist',
   outbase: 'src',
   bundle: true,

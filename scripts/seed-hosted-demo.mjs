@@ -44,6 +44,11 @@ try {
     password: process.env.ADMIN_PASSWORD,
   });
   if (user.role !== 'admin') throw new Error('Administrator access required.');
+  if (process.env.RESTORE_DEMO_COVERS === 'true') {
+    const storage = await call('/admin/media/storage');
+    if (storage.provider !== 'cloudinary')
+      throw new Error('Deploy and configure Cloudinary storage before restoring demo covers.');
+  }
   const terms = await call('/taxonomy');
   for (const [facet, names] of Object.entries(definitions)) {
     for (const name of names) {
@@ -100,7 +105,7 @@ try {
       story = await call('/admin/stories', 'POST', data);
       counts.storiesCreated++;
     }
-    if (!story.coverKey && images[index]) {
+    if ((!story.coverKey || process.env.RESTORE_DEMO_COVERS === 'true') && images[index]) {
       const form = new FormData();
       form.append(
         'cover',

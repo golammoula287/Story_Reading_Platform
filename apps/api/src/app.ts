@@ -2,8 +2,10 @@ import express from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
+import { deploymentRateLimitStore } from './rate-limit-store.js';
 import { randomUUID } from 'node:crypto';
 import mongoose from 'mongoose';
+import { MediaAsset } from './models.js';
 import path from 'node:path';
 import { mediaDir } from './config.js';
 import { errorHandler } from './lib.js';
@@ -34,6 +36,7 @@ export function createApp() {
     '/api/v1',
     rateLimit({
       windowMs: 60000,
+      store: deploymentRateLimitStore('api'),
       limit: 180,
       standardHeaders: 'draft-8',
       legacyHeaders: false,
@@ -43,8 +46,10 @@ export function createApp() {
     }),
   );
   app.use(express.json({ limit: '1mb' }), cookieParser(), checkOrigin, authenticate);
-  app.get('/api/v1/media/:key', (req, res, next) => {
+  app.get('/api/v1/media/:key', async (req, res, next) => {
     if (!/^[a-f\d-]+\.webp$/.test(req.params.key)) return res.status(404).end();
+    const asset = await MediaAsset.findOne({ key: req.params.key }).lean();
+    if (asset) return res.redirect(302, asset.url);
     res.sendFile(path.join(mediaDir, req.params.key), { dotfiles: 'allow' }, (err) => {
       if (err) {
         if ((err as { status?: number }).status === 404)
