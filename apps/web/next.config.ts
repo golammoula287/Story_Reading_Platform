@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 // Next.js automatically loads apps/web/.env.local and the appropriate
 // environment-specific file. Only NEXT_PUBLIC_ values may reach the browser.
-const backendOrigin = apiOrigin();
+const backendOrigin = apiOrigin(process.env, { allowUnconfigured: true });
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {
   transpilePackages: ['@storyhaven/contracts'],
@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${backendOrigin}/api/:path*`,
+        destination: backendOrigin ? `${backendOrigin}/api/:path*` : '/backend-unavailable',
       },
     ];
   },

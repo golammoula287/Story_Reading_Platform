@@ -50,6 +50,8 @@ Deploy the backend first and confirm `https://YOUR-BACKEND.vercel.app/health` re
 
 ## 3. Frontend environment variables
 
+You can deploy the frontend before the backend exists: leave `API_INTERNAL_URL` unset or keep the local template value. On Vercel this builds the frontend with API routes returning a no-store 503 until setup is complete. Reading, authentication and admin data require the backend. After hosting the API, set its HTTPS origin below and rebuild/redeploy the frontend to activate the proxy. Malformed URLs still fail validation.
+
 Set in the **frontend project's Production environment** before building:
 
 ```dotenv

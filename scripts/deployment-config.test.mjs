@@ -3,6 +3,33 @@ import { test } from 'node:test';
 import { apiOrigin } from '../apps/web/api-origin.mjs';
 test('local API default remains available', () =>
   assert.equal(apiOrigin({}), 'http://127.0.0.1:4000'));
+
+test('Vercel frontend-first build permits absent or loopback targets but runtime stays strict', () => {
+  for (const value of [
+    '',
+    'http://localhost:4000',
+    'http://127.0.0.1:4000',
+    'http://[::1]:4000',
+    'http://0.0.0.0:4000',
+  ]) {
+    const env = { VERCEL: '1', API_INTERNAL_URL: value };
+    assert.equal(apiOrigin(env, { allowUnconfigured: true }), null);
+    assert.throws(() => apiOrigin(env));
+  }
+  assert.equal(
+    apiOrigin(
+      { VERCEL: '1', API_INTERNAL_URL: 'https://backend.example/' },
+      { allowUnconfigured: true },
+    ),
+    'https://backend.example',
+  );
+  assert.throws(() =>
+    apiOrigin(
+      { VERCEL: '1', API_INTERNAL_URL: 'https://backend.example/api' },
+      { allowUnconfigured: true },
+    ),
+  );
+});
 test('normalizes deployment URL whitespace and trailing slash', () =>
   assert.equal(
     apiOrigin({ RENDER: 'true', API_INTERNAL_URL: ' https://backend.example/ ' }),

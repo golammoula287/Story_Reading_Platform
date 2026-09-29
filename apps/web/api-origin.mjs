@@ -1,7 +1,11 @@
 /** Resolve the server-only API target for both rewrites and server rendering. */
-export function apiOrigin(env = process.env) {
+export function apiOrigin(env = process.env, { allowUnconfigured = false } = {}) {
   const hosted = env.RENDER === 'true' || env.VERCEL === '1' || Boolean(env.RAILWAY_ENVIRONMENT);
   const value = env.API_INTERNAL_URL?.trim();
+  // Allow a frontend-first Vercel build without routing traffic to loopback.
+  // Runtime callers stay strict until the real backend is configured.
+  const frontendOnly = allowUnconfigured && env.VERCEL === '1';
+  if (!value && frontendOnly) return null;
   if (!value && hosted)
     throw new Error('Set API_INTERNAL_URL on the frontend service before building.');
   let url;
@@ -21,8 +25,10 @@ export function apiOrigin(env = process.env) {
     throw new Error(
       'API_INTERNAL_URL must contain only the backend origin, without credentials or /api paths.',
     );
-  if (hosted && ['localhost', '127.0.0.1', '[::1]', '0.0.0.0'].includes(url.hostname))
+  if (hosted && ['localhost', '127.0.0.1', '[::1]', '0.0.0.0'].includes(url.hostname)) {
+    if (frontendOnly) return null;
     throw new Error('API_INTERNAL_URL must point to the separate backend service, not localhost.');
+  }
   if (env.RENDER_EXTERNAL_URL && url.origin === new URL(env.RENDER_EXTERNAL_URL).origin)
     throw new Error('API_INTERNAL_URL points to the frontend itself; use the backend service URL.');
   return url.origin;
