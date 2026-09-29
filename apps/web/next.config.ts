@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 import path from 'node:path';
 import { apiOrigin } from './api-origin.mjs';
+import { canonicalRedirects } from './canonical-origin.mjs';
 import { fileURLToPath } from 'node:url';
 
 // Next.js automatically loads apps/web/.env.local and the appropriate
@@ -10,6 +11,9 @@ const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {
   transpilePackages: ['@storyhaven/contracts'],
   poweredByHeader: false,
+  async redirects() {
+    return canonicalRedirects() as Awaited<ReturnType<NonNullable<NextConfig['redirects']>>>;
+  },
   webpack(config) {
     config.resolve = {
       ...config.resolve,

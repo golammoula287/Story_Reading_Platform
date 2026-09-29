@@ -1,6 +1,40 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apiOrigin } from '../apps/web/api-origin.mjs';
+import { canonicalRedirects } from '../apps/web/canonical-origin.mjs';
+
+test('deployment aliases redirect to the production frontend without a canonical loop', () => {
+  const [rule] = canonicalRedirects({
+    VERCEL: '1',
+    VERCEL_PROJECT_PRODUCTION_URL: 'web.vercel.app',
+  });
+  assert.equal(rule.destination, 'https://web.vercel.app/:path*');
+  const redirects = (host) =>
+    new RegExp(`^${rule.has[0].value}$`).test(host) &&
+    !new RegExp(`^${rule.missing[0].value}$`).test(host);
+  assert.equal(redirects('web-git-main-team.vercel.app'), true);
+  assert.equal(redirects('web-hash-team.vercel.app'), true);
+  assert.equal(redirects('web.vercel.app'), false);
+  assert.equal(redirects('localhost'), false);
+  assert.deepEqual(canonicalRedirects({}), []);
+});
+
+test('explicit staging origin overrides production and invalid origins are rejected', () => {
+  assert.equal(
+    canonicalRedirects({
+      VERCEL: '1',
+      VERCEL_PROJECT_PRODUCTION_URL: 'web.vercel.app',
+      CANONICAL_WEB_ORIGIN: 'https://staging.example/',
+    })[0].destination,
+    'https://staging.example/:path*',
+  );
+  for (const value of [
+    'http://web.example',
+    'https://web.example/path',
+    'https://user:secret@web.example',
+  ])
+    assert.throws(() => canonicalRedirects({ VERCEL: '1', CANONICAL_WEB_ORIGIN: value }));
+});
 test('local API default remains available', () =>
   assert.equal(apiOrigin({}), 'http://127.0.0.1:4000'));
 
