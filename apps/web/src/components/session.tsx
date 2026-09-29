@@ -27,6 +27,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
   useEffect(() => {
     void refresh();
+    const recovered = () => {
+      void refresh();
+    };
+    window.addEventListener('storyhaven:backend-ready', recovered);
+    return () => window.removeEventListener('storyhaven:backend-ready', recovered);
   }, []);
   return <Context.Provider value={{ user, loading, refresh, logout }}>{children}</Context.Provider>;
 }

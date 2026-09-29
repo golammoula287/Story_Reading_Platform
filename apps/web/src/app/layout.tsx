@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
+import { BackendStartup } from '@/components/backend-startup';
 import { SessionProvider } from '@/components/session';
 import { Navigation } from '@/components/navigation';
 import './globals.css';
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <SessionProvider>
+          <BackendStartup />
           <a className="skip-link" href="#main">
             Skip to content
           </a>

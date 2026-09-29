@@ -1,3 +1,4 @@
+import { ensureBackendReady } from './backend-ready.mjs';
 import { apiOrigin } from '../../api-origin.mjs';
 export class HttpError extends Error {
   constructor(
@@ -9,6 +10,8 @@ export class HttpError extends Error {
   }
 }
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (typeof window !== 'undefined') await ensureBackendReady();
+  options.signal?.throwIfAborted();
   const multipart = options.body instanceof FormData;
   const res = await fetch(`/api/v1${path}`, {
     ...options,
@@ -25,7 +28,10 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     throw new HttpError(
       res.status,
       data.error?.code || 'REQUEST_FAILED',
-      data.error?.message || 'Something went wrong. Please try again.',
+      data.error?.message ||
+        (res.status >= 500
+          ? 'The service is temporarily unavailable. Please try again shortly.'
+          : 'Something went wrong. Please try again.'),
     );
   }
   return res.status === 204 ? (undefined as T) : res.json();
