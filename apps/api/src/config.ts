@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { webOriginSchema } from './web-origin.js';
 
 // Resolve from this module so API scripts work whether they are launched from
 // the monorepo root, the API directory, or the production dist directory.
@@ -48,23 +49,7 @@ const schema = z.object({
     .string()
     .startsWith('mongodb')
     .default('mongodb://127.0.0.1:27018/storyhaven?replicaSet=storyhaven'),
-  WEB_ORIGIN: z
-    .string()
-    .trim()
-    .pipe(z.url())
-    .default('http://localhost:3000')
-    .refine((value) => {
-      const url = new URL(value);
-      return (
-        ['http:', 'https:'].includes(url.protocol) &&
-        !url.username &&
-        !url.password &&
-        url.pathname === '/' &&
-        !url.search &&
-        !url.hash
-      );
-    }, 'WEB_ORIGIN must be the frontend origin without a path, query or credentials.')
-    .transform((value) => new URL(value).origin),
+  WEB_ORIGIN: webOriginSchema,
   MEDIA_STORAGE: z.enum(['local', 'cloudinary']).default('local'),
   CRON_SECRET: z.string().default(''),
   CLOUDINARY_CLOUD_NAME: z
@@ -79,7 +64,12 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_REDIRECT_URI: z.url().default('http://localhost:3000/api/v1/auth/google/callback'),
 });
-export const config = schema.parse(runtimeEnv);
+const parsed = schema.safeParse(runtimeEnv);
+if (!parsed.success)
+  throw new Error(
+    `Invalid backend environment settings: ${[...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))].join(', ')}. Use plain values in the hosting dashboard.`,
+  );
+export const config = parsed.data;
 if (process.env.VERCEL === '1') {
   if (!process.env.MONGODB_URI) throw new Error('Vercel requires MONGODB_URI.');
   if (config.MEDIA_STORAGE !== 'cloudinary') throw new Error('Vercel requires Cloudinary storage.');

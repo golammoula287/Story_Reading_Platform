@@ -24,6 +24,8 @@ The backend catch-all rewrite preserves request paths including `/health`, `/api
 
 ## 2. Backend environment variables
 
+Enter only the value in Vercel's Value field: for WEB_ORIGIN use `https://story-reading-platform-zeta.vercel.app`, not a whole assignment or formatted link. The backend also normalizes copied WEB_ORIGIN assignments and Markdown links whose displayed URL exactly matches their destination. Paths, credentials, non-HTTP(S) URLs and mismatched links remain invalid. Invalid configuration logs name the setting without echoing its value.
+
 Set these in the **backend project's Production environment**, using real values in the dashboard, never source files:
 
 | Variable                | Value                                                                    |
