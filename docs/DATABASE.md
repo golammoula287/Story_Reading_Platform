@@ -30,3 +30,11 @@ Deletion paths:
 - Taxonomy in use by a story or child cannot be deleted. Comments will add their retention/moderation rules in Phase 2.
 
 No production database or backup has been created. Source archives exclude `.local` databases and media. Before production, agree retention, media cleanup and backup cadence, restrict database access, create authentication credentials and verify a restore (Phase 3).
+
+Phase 2.1 adds User.readingPreferences: theme, fontFamily and fontSize. Defaults apply to existing accounts without a migration; preferences belong only to the authenticated account. Shared request validation bounds fontSize to 16–32 and allowlists themes/fonts.
+
+## Phase 2 models
+
+Comment: account/chapter references, bounded plain-text body, visible/hidden status and timestamps. Indexes support chapter/status pagination and user activity. Account/content deletion cascades comments.
+
+RewardSession: account/chapter/provider, unique hashed nonce, status, expiry and timestamps. RewardEvent: provider plus hashed transaction ID (unique pair), unique session reference and timestamps. Verified events, Unlock and session completion share a transaction. Replay tombstones contain no account or chapter identifiers and survive deletion. UnlockToken: unique random-token hash, account/chapter binding, explicit expiry plus TTL cleanup. Full content always rechecks active account, publication, maturity and durable entitlement. Detailed timing and retention decisions are in PHASE_2.md.

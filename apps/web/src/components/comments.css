@@ -1,0 +1,48 @@
+﻿.chapter-comments {
+  margin-top: 40px;
+  border-top: 1px solid currentColor;
+  padding-top: 24px;
+  font-size: 16px;
+}
+.chapter-comments .section-heading {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.chapter-comments h2 {
+  color: inherit;
+}
+.chapter-comments textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  color: inherit;
+  background: var(--reading-bg, white);
+  resize: vertical;
+  font: inherit;
+  margin: 10px 0;
+}
+.comment-list {
+  list-style: none;
+  padding: 0;
+}
+.comment-list > li {
+  padding: 20px 0;
+  border-bottom: 1px solid #8888;
+}
+.comment-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.comment-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 12px 0;
+}
+.comment-list time {
+  font-size: 13px;
+}

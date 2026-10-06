@@ -9,10 +9,12 @@ type ActivityItem = {
   storyId?: { title: string };
   chapterId?: { title: string };
   blockAnchor?: number;
+  body?: string;
+  status?: string;
   updatedAt?: string;
   createdAt?: string;
 };
-type Activity = Record<'library' | 'bookmarks' | 'progress' | 'reads', ActivityItem[]>;
+type Activity = Record<'library' | 'bookmarks' | 'progress' | 'reads' | 'comments', ActivityItem[]>;
 export default function Users() {
   const [data, setData] = useState<Page<Reader> | null>(null),
     [q, setQ] = useState(''),
@@ -180,7 +182,7 @@ export default function Users() {
           </div>
           <p className="muted small">The most recent 50 entries per category.</p>
           <div className="activity-grid">
-            {(['library', 'bookmarks', 'progress', 'reads'] as const).map((key) => (
+            {(['library', 'bookmarks', 'progress', 'reads', 'comments'] as const).map((key) => (
               <div key={key}>
                 <h3>
                   {key === 'progress'
@@ -195,6 +197,11 @@ export default function Users() {
                       <strong>
                         {item.chapterId?.title || item.storyId?.title || 'Unavailable content'}
                       </strong>
+                      {item.body && (
+                        <span className="comment-body">
+                          {item.body} ({item.status})
+                        </span>
+                      )}
                       <small>
                         {new Date(item.updatedAt || item.createdAt || '').toLocaleDateString()}
                         {item.blockAnchor !== undefined
@@ -209,9 +216,6 @@ export default function Users() {
               </div>
             ))}
           </div>
-          <p className="muted small">
-            Comment activity will be available when chapter comments are added in Phase 2.
-          </p>
         </section>
       )}
     </>

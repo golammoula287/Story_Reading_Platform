@@ -58,6 +58,19 @@ export const progressSchema = z.object({
   chapterId: objectId,
   blockAnchor: z.number().int().min(0).max(100000),
 });
+export const readingPreferencesSchema = z
+  .object({
+    theme: z.enum(['day', 'night', 'grey', 'off-white']),
+    fontFamily: z.enum(['serif', 'sans-serif']),
+    fontSize: z.number().int().min(16).max(32),
+  })
+  .strict();
+export type ReadingPreferences = z.infer<typeof readingPreferencesSchema>;
+export const defaultReadingPreferences: ReadingPreferences = {
+  theme: 'off-white',
+  fontFamily: 'serif',
+  fontSize: 20,
+};
 export type UserDto = {
   id: string;
   name: string;
@@ -98,3 +111,15 @@ export type ChapterDto = {
   preview: { mode: 'percentage' | 'words'; value: number };
 };
 export type Page<T> = { items: T[]; page: number; pages: number; total: number };
+
+export const commentSchema = z.object({ body: z.string().trim().min(1).max(2000) }).strict();
+export const commentModerationSchema = z.object({ status: z.enum(['visible', 'hidden']) }).strict();
+export type CommentDto = {
+  id: string;
+  chapterId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+  own: boolean;
+};
+export type AdminCommentDto = CommentDto & { status: 'visible' | 'hidden'; chapterTitle: string };

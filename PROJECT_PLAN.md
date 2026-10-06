@@ -155,3 +155,13 @@ Primary risks: a browser ad provider without S2S rewards, account approval delay
 ## 8. How work continues
 
 Phase 1 implementation and local verification are complete for the tested workflows; see PROJECT_CONTEXT.md and docs/MILESTONE_1.md for evidence and pending live integration/client review tasks. Keep the context current after each work session, including the exact subphase, completed work, tests, blockers and next action. The initial planning task created no application code. Subsequent authorized work implemented Phase 1 locally; production deployment remains Phase 3.
+
+## Phase 2 commencement (2026-10-02)
+
+User confirmed Phase 1 and directed Phase 2 to start. Subphase 2.1 is in progress: reader appearance controls and account preferences implemented, verification in progress. Subphases 2.2�2.4 remain planned; real rewarded-ad provider selection and callback proof remain prerequisites for integration acceptance. Phase 3 has not been authorized.
+
+## Phase 2 provider deferral (2026-10-05)
+
+The user requested completing Phase 2, then explicitly deferred ad-provider details to later. Reader, comments, display-ad scaffolding and reward integrity logic are implemented; local verification/review handover proceeds independently. A real display adapter and real server-authenticated reward adapter plus hosted proof remain deferred, not accepted or silently removed from scope. See docs/MILESTONE_2.md and docs/PHASE_2.md. Phase 3 remains unstarted.
+
+Phase 2 local verification finished on 2026-10-06. Reader/comments/reward fixture browser journey and final production build pass. Source review handover is prepared; real provider integration and milestone acceptance remain deferred/pending as recorded in docs/MILESTONE_2.md.

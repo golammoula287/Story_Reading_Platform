@@ -8,12 +8,18 @@ import mongoose from 'mongoose';
 import { MediaAsset } from './models.js';
 import path from 'node:path';
 import { mediaDir } from './config.js';
+import { rewardRoutes, acceptReward } from './modules/rewards.js';
+import { configuredRewardProvider, type RewardProvider } from './modules/reward-provider.js';
+import { ApiError } from './lib.js';
 import { errorHandler } from './lib.js';
 import { authenticate, authRouter, checkOrigin } from './modules/auth.js';
 import { contentRouter } from './modules/content.js';
+import { commentsRouter, adminCommentsRouter } from './modules/comments.js';
 import { readerRouter } from './modules/reader.js';
 import { adminRouter } from './modules/admin.js';
-export function createApp() {
+export function createApp({
+  rewardProvider = configuredRewardProvider,
+}: { rewardProvider?: RewardProvider | null } = {}) {
   const app = express();
   app.disable('x-powered-by');
   const isBehindProxy =
@@ -45,6 +51,24 @@ export function createApp() {
       },
     }),
   );
+  if (rewardProvider) {
+    if (!/^[a-z0-9-]+$/.test(rewardProvider.id)) throw Error('Invalid reward provider identifier');
+    // Only the configured provider callback bypasses browser CSRF; authentication is its signature.
+    app.post(
+      '/api/v1/ads/' + rewardProvider.id + '/callback',
+      express.raw({ type: '*/*', limit: '16kb' }),
+      async (req, res) => {
+        let proof;
+        try {
+          proof = await rewardProvider.verify(req.body, req.headers);
+        } catch {
+          throw new ApiError(401, 'INVALID_CALLBACK', 'Callback verification failed.');
+        }
+        await acceptReward(rewardProvider.id, proof);
+        res.status(204).end();
+      },
+    );
+  }
   app.use(express.json({ limit: '1mb' }), cookieParser(), checkOrigin, authenticate);
   app.get('/api/v1/media/:key', async (req, res, next) => {
     if (!/^[a-f\d-]+\.webp$/.test(req.params.key)) return res.status(404).end();
@@ -59,8 +83,11 @@ export function createApp() {
     });
   });
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/admin/comments', adminCommentsRouter);
   app.use('/api/v1/admin', adminRouter);
+  app.use('/api/v1/chapters/:chapterId/comments', commentsRouter);
   app.use('/api/v1/me', readerRouter);
+  app.use('/api/v1', rewardRoutes(rewardProvider));
   app.use('/api/v1', contentRouter);
   app.use((_req, res) =>
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } }),

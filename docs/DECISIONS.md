@@ -41,3 +41,11 @@ No provider account was created, no application was submitted, and no live callb
 ## Google authentication validation boundary
 
 Backend authorization code exchange, PKCE, one-use state, audience/nonce verification, active-account checks and secure session issuance are implemented. Invalid state and missing-config failure cases are tested. Successful real Google consent/token exchange remains untested because client credentials were not supplied. Follow README setup and record a live sign-in/sign-out/suspension test before milestone contractual acceptance.
+
+## Phase 2 implementation decisions (2026-10-05)
+
+The user requested completion of Phase 2 and deferred provider details to later. Provider adapters default to disabled; production startup never imports test adapters. Local transaction/signature fixtures establish local behavior only. Complete live monetization acceptance remains deferred.
+
+Comments use immediate publication with administrator hide/restore, plain text, a 2000-character limit, 10-per-page reader UI and five submissions per account/minute. Account/chapter/story deletion removes comments. Proposed ordinary-ad placement is every sixth paragraph, omitting previews and a trailing placement.
+
+Short-lived reading tokens refine the architecture proposal: random opaque bearer values are hashed in MongoDB, bound to account/chapter and expire after two minutes. They are optional delivery credentials and never replace login/durable entitlement. This avoids a new signing secret and supports immediate server-side expiry/revocation. Reward timing is a provisional 10-minute completion window plus five-minute callback grace, to be reconciled with the selected provider's documented semantics.

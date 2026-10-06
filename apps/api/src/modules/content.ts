@@ -1,4 +1,6 @@
+import { validateUnlockToken } from './rewards.js';
 import { Router } from 'express';
+import type { ClientSession } from 'mongoose';
 import { z } from 'zod';
 import { objectId } from '@storyhaven/contracts';
 import { Story, Chapter, ChapterContent, Taxonomy, Unlock, ReadEvent, Library } from '../models.js';
@@ -32,15 +34,24 @@ export const chapterDto = (c: InstanceType<typeof Chapter>) => ({
 export const visibleChapter = () => ({
   $or: [{ status: 'published' }, { status: 'scheduled', publishAt: { $lte: new Date() } }],
 });
-export async function publishedStory(id: string) {
-  const story = await Story.findOne({ _id: objectId.parse(id), status: 'published' });
+export async function publishedStory(id: string, session?: ClientSession) {
+  const story = await Story.findOne({ _id: objectId.parse(id), status: 'published' }).session(
+    session ?? null,
+  );
   if (!story) throw new ApiError(404, 'NOT_FOUND', 'Story not found.');
   return story;
 }
-export async function chapterAccess(id: string, user?: UserDto, full = false) {
-  const chapter = await Chapter.findOne({ _id: objectId.parse(id), ...visibleChapter() });
+export async function chapterAccess(
+  id: string,
+  user?: UserDto,
+  full = false,
+  session?: ClientSession,
+) {
+  const chapter = await Chapter.findOne({ _id: objectId.parse(id), ...visibleChapter() }).session(
+    session ?? null,
+  );
   if (!chapter) throw new ApiError(404, 'NOT_FOUND', 'Chapter not found.');
-  const story = await publishedStory(String(chapter.storyId));
+  const story = await publishedStory(String(chapter.storyId), session);
   const gated =
     story.classification === 'mature' && !user?.matureConfirmed && user?.role !== 'admin';
   if (full) {
@@ -54,12 +65,12 @@ export async function chapterAccess(id: string, user?: UserDto, full = false) {
     if (
       chapterDto(chapter).accessType === 'premium' &&
       user.role !== 'admin' &&
-      !(await Unlock.exists({ userId: user.id, chapterId: chapter._id }))
+      !(await Unlock.exists({ userId: user.id, chapterId: chapter._id }).session(session ?? null))
     )
       throw new ApiError(
         403,
         'CHAPTER_LOCKED',
-        'This premium chapter is locked. Rewarded unlocks arrive in Phase 2.',
+        'This premium chapter is locked. Unlock it when a rewarded ad is available.',
       );
   }
   return { chapter, story, gated };
@@ -157,6 +168,8 @@ contentRouter.get('/chapters/:id/preview', async (req, res) => {
 });
 contentRouter.get('/chapters/:id/content', requireUser, async (req, res) => {
   const { chapter } = await chapterAccess(String(req.params.id), req.user, true);
+  const token = req.get('X-Unlock-Token');
+  if (token) await validateUnlockToken(token, req.user!.id, chapter.id);
   const content = await ChapterContent.findOne({ chapterId: chapter._id });
   if (!content) throw new ApiError(404, 'NOT_FOUND', 'Chapter content is unavailable.');
   res.json({ chapter: chapterDto(chapter), body: content.body });

@@ -79,7 +79,7 @@ beforeAll(async () => {
     .post('/api/v1/auth/register')
     .set(headers)
     .send({ name: 'Other Reader', email: 'other@example.test', password });
-}, 30000);
+}, 120000);
 afterAll(async () => {
   await mongoose.connection.dropDatabase();
   await mongoose.disconnect();

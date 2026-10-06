@@ -1,0 +1,36 @@
+﻿.in-chapter-ad {
+  position: relative;
+  display: block;
+  clear: both;
+  isolation: isolate;
+  min-height: 120px;
+  max-width: 100%;
+  margin: 32px 0;
+  padding: 16px;
+  border: 1px solid #8888;
+  border-radius: 8px;
+  text-align: center;
+  font:
+    14px/1.5 Arial,
+    sans-serif;
+  overflow: hidden;
+}
+.in-chapter-ad > small {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.in-chapter-ad p {
+  margin: 12px 0;
+}
+.in-chapter-ad button {
+  margin: 4px;
+}
+.ad-creative {
+  max-width: 100%;
+  overflow: hidden;
+}
+.ad-creative iframe,
+.ad-creative img {
+  max-width: 100%;
+}

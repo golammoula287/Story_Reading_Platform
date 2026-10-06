@@ -8,6 +8,7 @@ const links = [
   { href: '/admin/stories', label: 'Stories & chapters', icon: BookOpen },
   { href: '/admin/taxonomy', label: 'Genres & tags', icon: Tags },
   { href: '/admin/users', label: 'Readers', icon: Users },
+  { href: '/admin/comments', label: 'Comments', icon: BookOpen },
 ];
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();

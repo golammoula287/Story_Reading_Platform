@@ -1,12 +1,12 @@
 # Project Context
 
-Last updated: 2026-09-29.
+Last updated: 2026-10-06.
 
 ## Purpose and current instruction
 
 Build a serial-fiction reading platform based on the local 14-page WEBSITE DEVELOPMENT CONTRACT.pdf. The user requested: read the entire document, plan carefully using MERN, organize delivery into three main phases with subphases, then establish a context file before further implementation.
 
-Current status: **Phase 1 local build and tested workflows pass; live external checks and client acceptance remain pending.** Root: `D:/Naeem_Project/Story reading platform`. Backend: `apps/api`; frontend: `apps/web`; shared contracts: `packages/contracts`.
+Current status: **User confirmed Phase 1 and authorized Phase 2 on 2026-10-02. Phase 2 independent local implementation and verification are complete; the user deferred commercial ad-provider integration to later on 2026-10-05.** Root: `D:/Story_reading_App`. Backend: `apps/api`; frontend: `apps/web`; shared contracts: `packages/contracts`.
 
 The user has resumed work and authorized completing the remaining checks one by one. On 2026-09-24, `npm run build`, `npm run typecheck`, and all 15 MongoDB integration tests passed from the relocated root. The built website/API run locally through `npm start`; the database runs through `npm run db:local`. Desktop/mobile discovery and the reader browser journey passed. The admin journey passed after changing its test locator to the accessible status combobox; no app fix was required. All three browser journeys now have passing evidence across the initial run and focused rerun.
 
@@ -54,16 +54,16 @@ Proposed relative schedule: 25 working days, subject to verified project start, 
 
 | Phase/subphase                                | Proposed days | Status                                                                                 |
 | --------------------------------------------- | ------------- | -------------------------------------------------------------------------------------- |
-| 1. Foundation, Admin, and Core Reader         | 1?9           | Implemented and locally verified; external checks/client acceptance pending            |
+| 1. Foundation, Admin, and Core Reader         | 1?9           | User confirmed Phase 1; outstanding external checks tracked separately            |
 | 1.1 Requirements, UX and provider feasibility | 1?2           | Reviewable UI/defaults documented; client decisions and live ad-provider proof pending |
 | 1.2 MERN foundation and authentication        | 3?4           | Local checks pass; successful live Google Sign-In pending credentials                  |
 | 1.3 Admin and publishing                      | 5?7           | API checks and admin publishing browser test pass                                      |
 | 1.4 Core reader and Milestone 1 delivery      | 8?9           | Reader/discovery tests pass; source handover prepared for review                       |
-| 2. Reading Experience and Monetization        | 10–18         | Not started                                                                            |
-| 2.1 Reader interface and preferences          | 10–12         | Not started                                                                            |
-| 2.2 Comments and in-chapter ads               | 13–14         | Not started                                                                            |
-| 2.3 Verified premium unlock                   | 15–17         | Not started                                                                            |
-| 2.4 Milestone 2 verification and delivery     | 18            | Not started                                                                            |
+| 2. Reading Experience and Monetization        | 10–18         | In progress                                                                            |
+| 2.1 Reader interface and preferences          | 10–12         | Implemented and locally verified                                                                            |
+| 2.2 Comments and in-chapter ads               | 13–14         | Comments implemented/tested; display adapter deferred                                                                            |
+| 2.3 Verified premium unlock                   | 15–17         | Reward core implemented/tested; real provider deferred                                                                            |
+| 2.4 Milestone 2 verification and delivery     | 18            | Local checks passed; source review handover prepared                                                                            |
 | 3. Protection, SEO, Deployment, and Handover  | 19–25         | Not started                                                                            |
 | 3.1 Preview configuration and protection      | 19–20         | Not started                                                                            |
 | 3.2 SEO and final public experience           | 21–22         | Not started                                                                            |
@@ -106,7 +106,7 @@ These items did not block preparation of the plan. They block only their depende
 
 ## Next action
 
-Next external step: deploy both frontend and separate Express API to Vercel using `docs/DEPLOYMENT_VERCEL.md`, as requested on 2026-09-29. Configure the two projects' production origins, Atlas, Cloudinary and cron credentials; verify live authentication, cover persistence and cron before switching traffic. The earlier Railway/Render guides remain historical alternatives. Atlas connectivity was verified on 2026-09-25 without logging credentials. Keep secrets in ignored local environment files and host-managed production variables. Resolve rewarded-ad provider feasibility and client review before declaring Phase 1 accepted; do not begin Phase 2 without direction.
+Next external step: deploy both frontend and separate Express API to Vercel using `docs/DEPLOYMENT_VERCEL.md`, as requested on 2026-09-29. Configure the two projects' production origins, Atlas, Cloudinary and cron credentials; verify live authentication, cover persistence and cron before switching traffic. The earlier Railway/Render guides remain historical alternatives. Atlas connectivity was verified on 2026-09-25 without logging credentials. Keep secrets in ignored local environment files and host-managed production variables. The user supplied Phase 1 confirmation and Phase 2 direction on 2026-10-02. Continue Phase 2.1 sequential verification; rewarded-ad provider feasibility remains an external dependency.
 
 After each implementation session update: current subphase, changed files, actual commands/test results, decisions and their source, open defects/blockers, milestone delivery/acceptance status, and the next concrete task. Preserve unresolved items until evidence resolves them.
 
@@ -184,3 +184,39 @@ Subsequent UI request: removed the full-screen “Getting your stories ready” 
 User reported a Vercel frontend build failure caused by API_INTERNAL_URL pointing to localhost and explicitly requested deploying the frontend before configuring the backend. Next.js configuration now permits missing/loopback targets on Vercel and rewrites API requests to a local no-store 503 route until configured. Runtime API-origin resolution remains strict; malformed URLs still fail validation. Local development and other host validation remain unchanged. Updated the frontend environment template and deployment guide with the frontend-first option and the requirement to rebuild after setting the actual backend origin.
 
 Verification: all five deployment configuration tests passed via node scripts/deployment-config.test.mjs. The frontend production build, including TypeScript, passed with VERCEL=1 and API_INTERNAL_URL=http://localhost:4000, reproducing the previously failing configuration. The new backend-unavailable route is included in the build. No production deployment was performed. Next: push these changes and redeploy the frontend; after hosting the backend, set API_INTERNAL_URL to its HTTPS origin and redeploy again to enable data/authentication features. External acceptance status remains unchanged.
+
+## Phase 2 started (2026-10-02)
+
+User explicitly confirmed Phase 1 and requested Phase 2. This supersedes earlier instructions to wait before Phase 2. Record user confirmation separately from still-unverified live Google OAuth, authenticated production journeys and rewarded-provider callback evidence.
+
+Subphase 2.1: implemented Day, Night, Grey and Off-White reader themes, serif/sans-serif selection, 16�32 px font sizing, explicit account-save feedback and loading/error/retry states. Shared strict preference schema and authenticated GET/PUT /api/v1/me/preferences persist settings on the User record. Existing accounts receive defaults; requests cannot target another account. Existing bookmarks, navigation, progress and workspace loading/UI changes were preserved. No credentials or production data were read or changed.
+
+Verification: npm run typecheck passed. Dedicated real-MongoDB preference integration test passed (fresh-login persistence, defaults/account isolation, private no-store response, anonymous/suspended denial, CSRF and invalid payload rejection). Sandbox process-spawn restrictions required approved execution outside the sandbox. API build and frontend compilation/type checking passed; final production-build result recorded below. Browser theme/mobile/long-chapter and second-device resume verification remain pending, so subphase 2.1 is not yet marked complete.
+
+Next: finish 2.1 browser verification, then implement 2.2 comments/moderation and ordinary ad slots. Provider selection and authenticated browser-compatible server-to-server completion proof remain unresolved for 2.3; never substitute browser completion events. Milestone 2 has not been delivered or accepted. Phase 3 remains unauthorized.
+
+Final verification: npm run build passed for API, worker, serverless bundle and Next.js production output. Focused integration rerun also passed. git diff --check passed. Browser acceptance remains pending.
+
+
+## Phase 2 completion work (2026-10-05)
+
+User requested completion of Phase 2 and then deferred provider details ("take it for the latter"). Continue all independent implementation and local verification; do not invent or enable a commercial provider, or describe real monetization as complete. Phase 3 remains outside this authorization.
+
+Completed comments/moderation, account activity and transactional deletion cleanup; ordinary-ad component/adapter boundary and consent/failure states; reward session, event, durable entitlement and token backend; availability/start/poll/cancel/retry reader UI. Actual production adapters remain null. Fixture adapters live only in tests and are never loaded by production startup. Full content and comments retain server-side authorization and no-store responses.
+
+Reward tests cover signature rejection, nonce/session binding, concurrent duplicates, cross-session replay, transaction rollback/retry, cancellation, expiry/grace, suspension/publication/age changes, fresh-login access and token account/expiry/entitlement checks. Eight reward tests and 15 existing chapter/admin tests pass; five comments tests and five serverless checks pass; preferences and ordinary-ad browser matrix also pass. Slow initial database/index setup required longer test setup time and an explicit local TEST_MONGODB_URI override; no Atlas records were used. One delayed callback fixture was corrected to set immutable creation time through the test collection. Full browser journey and final build are being completed below.
+
+Browser verification found that cached hidden chapter DOM could confuse page-wide paragraph queries. Reading progress and resume now use the current reader root. Test locators target visible reader content. Initial browser attempts also required fixing harness ESM/variable-name issues and allowing cold page compilation; those failures are not reported as successful acceptance.
+
+See docs/PHASE_2.md for implementation defaults, opaque-token refinement, callback timing, comment rules, provider integration requirements and reproducible tests. docs/MILESTONE_2.md records review status. Package command now accepts milestone 1/2/3, preserving existing Milestone 1 archives. Next: complete browser/build verification, create and validate the Milestone 2 review archive, then await provider details for live integration.
+
+Further browser diagnosis: duplicate narrative elements came from identical React sibling keys on ChapterNarrative and ChapterComments during session refresh. Keys now have distinct narrative/comments prefixes. Reader-root query scoping is retained as a robustness improvement, with a separate saved resume anchor and clamping after chapter edits. The earlier cached-DOM diagnosis was provisional; the duplicate-key warning identified the concrete cause.
+
+
+## Phase 2 local handover (2026-10-06)
+
+Completed final browser verification and production build. Browser checks passed all four themes/font controls, long mobile reading, cross-browser preferences/resume, escaped comments, administrator hide/restore, reader delete/refresh, anonymous denial, unsigned callback rejection, signed fixture reward polling and durable unlock after a fresh login. Final browser run asserts no runtime/hydration errors. Navigation now keeps its initial account-loading markup stable through hydration. Both narrative/comment React keys are distinct; current-reader anchor scoping and separate saved resume anchors prevent incorrect resume behavior.
+
+Final npm run build passed API, worker, serverless bundle and Next.js including TypeScript. Recorded focused backend coverage totals 34 passing cases across existing access/admin, rewards, comments, preferences and serverless tests; ordinary-ad browser matrix passed separately. No production provider or Atlas data was used or changed. See docs/MILESTONE_2.md for results/limits and docs/PHASE_2.md for test and integration instructions.
+
+Milestone 2 complete-to-date source handover is prepared through npm run package:milestone -- 2, with source and archive SHA256 manifests and secret/cache/contract exclusions. Delivery is for review; client acceptance and the real ad-provider integration remain pending. No deployment or Phase 3 work was performed. Next: user supplies the provider details previously deferred, then implement its actual display/reward adapters and verify live callback/inventory behavior before final monetization acceptance.

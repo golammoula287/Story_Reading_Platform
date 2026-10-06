@@ -1,10 +1,14 @@
 'use client';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { BookOpen, Library, Search, ArrowUpRight, LogOut } from 'lucide-react';
 import { useSession } from './session';
+import { Spinner } from './loading-state';
 export function Navigation() {
   const { user, loading, logout } = useSession();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isTrending = pathname === '/discover' && searchParams.get('view') === 'trending';
@@ -38,8 +42,10 @@ export function Navigation() {
           <Link className="icon-link" href="/discover" aria-label="Search stories">
             <Search size={19} />
           </Link>
-          {loading ? (
-            <span className="muted small">One moment…</span>
+          {!hydrated || loading ? (
+            <span className="nav-loading" role="status" aria-label="Loading account">
+              <Spinner />
+            </span>
           ) : user ? (
             <>
               <Link className="account-link" href={user.role === 'admin' ? '/admin' : '/account'}>

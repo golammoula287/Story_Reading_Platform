@@ -10,6 +10,11 @@ const userSchema = new Schema(
     role: { type: String, enum: ['reader', 'admin'], default: 'reader' },
     status: { type: String, enum: ['active', 'suspended', 'deleted'], default: 'active' },
     matureConfirmedAt: Date,
+    readingPreferences: {
+      theme: { type: String, enum: ['day', 'night', 'grey', 'off-white'], default: 'off-white' },
+      fontFamily: { type: String, enum: ['serif', 'sans-serif'], default: 'serif' },
+      fontSize: { type: Number, min: 16, max: 32, default: 20 },
+    },
   },
   options,
 );
@@ -137,3 +142,58 @@ export const MediaAsset = model(
     options,
   ),
 );
+
+const commentModelSchema = new Schema(
+  {
+    userId: ref('User'),
+    chapterId: ref('Chapter'),
+    body: { type: String, required: true, maxlength: 2000 },
+    status: { type: String, enum: ['visible', 'hidden'], default: 'visible', required: true },
+  },
+  options,
+);
+commentModelSchema.index({ chapterId: 1, status: 1, createdAt: -1, _id: -1 });
+commentModelSchema.index({ status: 1, createdAt: -1, _id: -1 });
+commentModelSchema.index({ userId: 1, createdAt: -1 });
+export const Comment = model('Comment', commentModelSchema);
+
+const rewardSessionSchema = new Schema(
+  {
+    userId: ref('User'),
+    chapterId: ref('Chapter'),
+    provider: { type: String, required: true },
+    nonceHash: { type: String, required: true, unique: true },
+    status: {
+      type: String,
+      enum: ['pending', 'verified', 'expired', 'failed', 'cancelled'],
+      default: 'pending',
+      required: true,
+    },
+    expiresAt: { type: Date, required: true },
+  },
+  options,
+);
+rewardSessionSchema.index({ userId: 1, createdAt: -1 });
+rewardSessionSchema.index({ chapterId: 1 });
+export const RewardSession = model('RewardSession', rewardSessionSchema);
+const rewardEventSchema = new Schema(
+  {
+    provider: { type: String, required: true },
+    transactionHash: { type: String, required: true },
+    sessionId: { ...ref('RewardSession'), unique: true },
+  },
+  options,
+);
+rewardEventSchema.index({ provider: 1, transactionHash: 1 }, { unique: true });
+export const RewardEvent = model('RewardEvent', rewardEventSchema);
+const unlockTokenSchema = new Schema(
+  {
+    userId: ref('User'),
+    chapterId: ref('Chapter'),
+    tokenHash: { type: String, required: true, unique: true },
+    expiresAt: { type: Date, required: true },
+  },
+  options,
+);
+unlockTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+export const UnlockToken = model('UnlockToken', unlockTokenSchema);

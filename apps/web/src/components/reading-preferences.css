@@ -1,0 +1,70 @@
+.reading-surface {
+  --reading-bg: #fffaf0;
+  --reading-ink: #302b25;
+  background: var(--reading-bg);
+  color: var(--reading-ink);
+  border-radius: 16px;
+  padding: clamp(16px, 4vw, 40px);
+}
+.reading-surface[data-theme='day'] {
+  --reading-bg: #ffffff;
+  --reading-ink: #222222;
+}
+.reading-surface[data-theme='night'] {
+  --reading-bg: #191c24;
+  --reading-ink: #e6e8ed;
+  color-scheme: dark;
+}
+.reading-surface[data-theme='grey'] {
+  --reading-bg: #e1e3e6;
+  --reading-ink: #292c32;
+}
+.reading-surface .narrative {
+  font-size: var(--reading-font-size);
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--reading-ink);
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+.reading-surface[data-font='sans-serif'] .narrative {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.reading-surface .reader-article > h1,
+.reading-surface .reader-byline,
+.reading-surface .reader-article > .eyebrow {
+  color: var(--reading-ink);
+}
+.reading-settings {
+  margin: 0 auto 28px;
+  max-width: 760px;
+}
+.reading-settings summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 12px 0;
+}
+.reading-settings fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: end;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+.reading-settings label {
+  display: grid;
+  gap: 8px;
+  flex: 1 1 140px;
+}
+.reading-settings select {
+  color: var(--reading-ink);
+  background: var(--reading-bg);
+  padding: 10px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+}
+.reading-settings input {
+  width: 100%;
+}

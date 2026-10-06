@@ -66,3 +66,11 @@ Story input: title, slug, authorName, prologue, status (`draft`/`published`), cl
 Chapter input: title, slug, body (plain text, max 200,000 characters), status (`draft`/`scheduled`/`published`), nullable ISO-UTC publishAt/freeAt, accessType (`free`/`premium`), preview `{mode:"percentage"|"words",value:number}`. Scheduled publication needs a date; percentage preview must be below 100 and word count at most 10,000. The excerpt engine caps output below the complete chapter even when the requested count exceeds its length.
 
 Infrastructure readiness endpoint: `GET /health` outside the API version prefix. Returns 200 only when the database connection is ready.
+
+## Reader preferences (Phase 2.1)
+
+GET /api/v1/me/preferences returns the active account's reading settings. PUT at the same path replaces them with a strict JSON object: theme (day, night, grey, off-white), fontFamily (serif, sans-serif), fontSize (integer 16–32). Both require an active session; writes require the usual trusted Origin and X-Requested-With header. Responses are private/no-store. New and existing accounts default to off-white, serif, 20 px. No user identifier is accepted in the payload.
+
+## Phase 2 routes
+
+See [Phase 2 integration guide](PHASE_2.md) for comment/moderation and reward session/callback/token endpoints, authorization rules, adapter availability and verification boundaries. The production reward adapter remains unconfigured at the user's request; local signed fixtures do not enable production callbacks.

@@ -1,12 +1,32 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { objectId, progressSchema } from '@storyhaven/contracts';
+import {
+  objectId,
+  progressSchema,
+  readingPreferencesSchema,
+  defaultReadingPreferences,
+} from '@storyhaven/contracts';
 import { Bookmark, Chapter, Library, Progress, Story, User } from '../models.js';
 import { requireUser } from './auth.js';
 import { chapterAccess, chapterDto, publishedStory, storyDto, visibleChapter } from './content.js';
 import { ApiError, pagination, pageResult } from '../lib.js';
 export const readerRouter = Router();
 readerRouter.use(requireUser);
+readerRouter.get('/preferences', async (req, res) => {
+  const user = await User.findById(req.user!.id);
+  res.json(
+    readingPreferencesSchema.parse({
+      theme: user!.readingPreferences?.theme ?? defaultReadingPreferences.theme,
+      fontFamily: user!.readingPreferences?.fontFamily ?? defaultReadingPreferences.fontFamily,
+      fontSize: user!.readingPreferences?.fontSize ?? defaultReadingPreferences.fontSize,
+    }),
+  );
+});
+readerRouter.put('/preferences', async (req, res) => {
+  const preferences = readingPreferencesSchema.parse(req.body);
+  await User.updateOne({ _id: req.user!.id }, { $set: { readingPreferences: preferences } });
+  res.json(preferences);
+});
 readerRouter.get('/library', async (req, res) => {
   const { page, limit, skip } = pagination(req);
   const entries = await Library.find({ userId: req.user!.id }).sort({ createdAt: -1 });

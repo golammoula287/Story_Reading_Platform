@@ -3,8 +3,10 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 const root = process.cwd();
+const milestone = process.argv[2] ?? '1';
+if (!['1', '2', '3'].includes(milestone)) throw new Error('Choose milestone 1, 2 or 3.');
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const stage = path.join(root, '.local', `milestone-1-${stamp}`);
+const stage = path.join(root, '.local', `milestone-${milestone}-${stamp}`);
 const output = path.join(root, 'releases');
 await mkdir(stage, { recursive: true });
 await mkdir(output, { recursive: true });
@@ -71,7 +73,7 @@ await manifest(stage);
 await writeFile(path.join(stage, 'SHA256SUMS.txt'), checksums.sort().join('\n') + '\n');
 const archive = path.join(
   output,
-  `storyhaven-milestone-1-${stamp}.${process.platform === 'win32' ? 'zip' : 'tar.gz'}`,
+  `storyhaven-milestone-${milestone}-${stamp}.${process.platform === 'win32' ? 'zip' : 'tar.gz'}`,
 );
 if (process.platform === 'win32')
   execFileSync(

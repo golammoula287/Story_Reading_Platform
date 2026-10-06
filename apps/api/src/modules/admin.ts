@@ -12,6 +12,9 @@ import {
   Bookmark,
   Chapter,
   ChapterContent,
+  Comment,
+  RewardSession,
+  UnlockToken,
   Library,
   Progress,
   ReadEvent,
@@ -89,6 +92,9 @@ adminRouter.delete('/stories/:id', async (req, res) => {
     await Story.deleteOne({ _id: story._id }).session(session);
     const chapters = await Chapter.find({ storyId: story._id }).session(session);
     const ids = chapters.map((c) => c._id);
+    await Comment.deleteMany({ chapterId: { $in: ids } }).session(session);
+    await RewardSession.deleteMany({ chapterId: { $in: ids } }).session(session);
+    await UnlockToken.deleteMany({ chapterId: { $in: ids } }).session(session);
     await ChapterContent.deleteMany({ chapterId: { $in: ids } }).session(session);
     await Chapter.deleteMany({ storyId: story._id }).session(session);
     await Bookmark.deleteMany({ chapterId: { $in: ids } }).session(session);
@@ -166,6 +172,9 @@ adminRouter.delete('/chapters/:id', async (req, res) => {
   await mongoose.connection.transaction(async (session) => {
     await Story.updateOne({ _id: chapter.storyId }, { $inc: { __v: 1 } }).session(session);
     await Chapter.deleteOne({ _id: chapter._id }).session(session);
+    await Comment.deleteMany({ chapterId: chapter._id }).session(session);
+    await RewardSession.deleteMany({ chapterId: chapter._id }).session(session);
+    await UnlockToken.deleteMany({ chapterId: chapter._id }).session(session);
     await ChapterContent.deleteOne({ chapterId: chapter._id }).session(session);
     await Bookmark.deleteMany({ chapterId: chapter._id }).session(session);
     await Progress.deleteMany({ chapterId: chapter._id }).session(session);
@@ -270,6 +279,9 @@ adminRouter.delete('/users/:id', async (req, res) => {
         $unset: { passwordHash: '', googleSub: '', matureConfirmedAt: '' },
       },
     ).session(session);
+    await Comment.deleteMany({ userId: id }).session(session);
+    await RewardSession.deleteMany({ userId: id }).session(session);
+    await UnlockToken.deleteMany({ userId: id }).session(session);
     await Session.deleteMany({ userId: id }).session(session);
     await Library.deleteMany({ userId: id }).session(session);
     await Bookmark.deleteMany({ userId: id }).session(session);
@@ -282,7 +294,8 @@ adminRouter.delete('/users/:id', async (req, res) => {
 });
 adminRouter.get('/users/:id/activity', async (req, res) => {
   const id = objectId.parse(req.params.id);
-  const [library, bookmarks, progress, reads] = await Promise.all([
+  const [library, bookmarks, progress, reads, comments] = await Promise.all([
+    // Comment history is restricted to this administrator route.
     Library.find({ userId: id }).populate('storyId', 'title').sort({ updatedAt: -1 }).limit(50),
     Bookmark.find({ userId: id }).populate('chapterId', 'title').sort({ updatedAt: -1 }).limit(50),
     Progress.find({ userId: id })
@@ -291,8 +304,13 @@ adminRouter.get('/users/:id/activity', async (req, res) => {
       .sort({ updatedAt: -1 })
       .limit(50),
     ReadEvent.find({ userId: id }).populate('chapterId', 'title').sort({ createdAt: -1 }).limit(50),
+    Comment.find({ userId: id })
+      .select('chapterId body status createdAt')
+      .populate('chapterId', 'title')
+      .sort({ createdAt: -1 })
+      .limit(50),
   ]);
-  res.json({ library, bookmarks, progress, reads, comments: [], commentsAvailable: false });
+  res.json({ library, bookmarks, progress, reads, comments, commentsAvailable: true });
 });
 const upload = multer({
   storage: multer.memoryStorage(),

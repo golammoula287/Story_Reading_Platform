@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useSession } from './session';
+import { LoadingState } from './loading-state';
 export function RequireSession({
   children,
   admin = false,
@@ -10,7 +11,7 @@ export function RequireSession({
   admin?: boolean;
 }) {
   const { user, loading } = useSession();
-  if (loading) return <div className="empty-state">Opening your space…</div>;
+  if (loading) return <LoadingState label="Opening your space…" />;
   if (!user)
     return (
       <div className="empty-state">

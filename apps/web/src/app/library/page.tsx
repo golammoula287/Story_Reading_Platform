@@ -7,6 +7,7 @@ import { api, message } from '@/lib/api';
 import { Cover } from '@/components/story-card';
 import { RequireSession } from '@/components/require-session';
 import { useSession } from '@/components/session';
+import { LoadingState, StorySkeletons } from '@/components/loading-state';
 type SavedStory = StoryDto & { progress: { chapterSlug: string } | null };
 type SavedBookmark = { chapter: ChapterDto; story: StoryDto; blockAnchor: number };
 export default function LibraryPage() {
@@ -82,7 +83,10 @@ export default function LibraryPage() {
           </p>
         )}
         {busy ? (
-          <p className="empty-state">Opening your library…</p>
+          <>
+            <LoadingState label="Opening your library…" compact />
+            <StorySkeletons />
+          </>
         ) : tab === 'stories' ? (
           stories.length ? (
             <div className="library-grid">

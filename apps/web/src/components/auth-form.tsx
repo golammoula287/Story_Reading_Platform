@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { api, json, message } from '@/lib/api';
 import { useSession } from './session';
+import { Spinner } from './loading-state';
 export function AuthForm({ register = false }: { register?: boolean }) {
   const { refresh } = useSession();
   const [error, setError] = useState(''),
@@ -23,6 +24,7 @@ export function AuthForm({ register = false }: { register?: boolean }) {
   }, []);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (busy) return;
     setError('');
     setBusy(true);
     const form = new FormData(e.currentTarget);
@@ -113,9 +115,15 @@ export function AuthForm({ register = false }: { register?: boolean }) {
               {error}
             </p>
           )}
-          <button className="button full-width" disabled={busy}>
-            {busy ? 'One moment…' : register ? 'Create your account' : 'Sign in'}
-            <ArrowRight size={17} />
+          <button className="button full-width" disabled={busy} aria-busy={busy}>
+            {busy
+              ? register
+                ? 'Creating your account…'
+                : 'Signing you in…'
+              : register
+                ? 'Create your account'
+                : 'Sign in'}
+            {busy ? <Spinner /> : <ArrowRight size={17} />}
           </button>
         </form>
         <p className="auth-switch">

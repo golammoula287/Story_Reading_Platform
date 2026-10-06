@@ -5,6 +5,11 @@ import { ArrowLeft, ArrowRight, Bookmark, Check, Lock } from 'lucide-react';
 import type { ChapterDto, StoryDto } from '@storyhaven/contracts';
 import { useSession } from './session';
 import { api, json, message } from '@/lib/api';
+import { RewardUnlock } from './reward-unlock';
+import { ChapterNarrative } from './in-chapter-ads';
+import { ChapterComments } from './chapter-comments';
+import { LoadingState } from './loading-state';
+import { ReadingPreferencesPanel } from './reading-preferences';
 export function Reader({
   story,
   chapter,
@@ -23,7 +28,10 @@ export function Reader({
     [error, setError] = useState(''),
     [saved, setSaved] = useState(false),
     [notice, setNotice] = useState('');
+  const [accessRevision, setAccessRevision] = useState(0);
   const anchor = useRef(0);
+  const resumeAnchor = useRef(0);
+  const readerRoot = useRef<HTMLDivElement>(null);
   const index = chapters.findIndex((c) => c.id === chapter.id);
   useEffect(() => {
     setBody(null);
@@ -41,7 +49,10 @@ export function Reader({
           `/me/progress/${story.id}`,
         );
         if (!active) return;
-        anchor.current = progress?.chapterId === chapter.id ? progress.blockAnchor : 0;
+        const lastParagraph = Math.max(0, result.body.split(/\n\s*\n/).filter(Boolean).length - 1);
+        anchor.current =
+          progress?.chapterId === chapter.id ? Math.min(progress.blockAnchor, lastParagraph) : 0;
+        resumeAnchor.current = anchor.current;
         if (anchor.current)
           setNotice('Your reading position was saved. Use “Resume position” to return.');
         await api(`/me/progress/${story.id}`, {
@@ -60,14 +71,14 @@ export function Reader({
     return () => {
       active = false;
     };
-  }, [user, chapter.id, story.id]);
+  }, [user, chapter.id, story.id, accessRevision]);
   useEffect(() => {
     if (!body || !user) return;
     let timer: ReturnType<typeof setTimeout>;
     const onScroll = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        const paragraphs = [...document.querySelectorAll('[data-paragraph]')];
+        const paragraphs = [...(readerRoot.current?.querySelectorAll('[data-paragraph]') ?? [])];
         const current = paragraphs.findIndex((p) => p.getBoundingClientRect().bottom > 100);
         if (current >= 0) {
           anchor.current = current;
@@ -98,7 +109,7 @@ export function Reader({
   }
   const text = body ?? preview;
   return (
-    <div className="reader-page container">
+    <div className="reader-page container" ref={readerRoot}>
       <div className="reader-toolbar">
         <Link className="text-link" href={`/stories/${story.slug}`}>
           <ArrowLeft size={16} /> {story.title}
@@ -110,87 +121,105 @@ export function Reader({
           </button>
         )}
       </div>
-      <article className="reader-article">
-        <span className="eyebrow">CHAPTER {chapter.order}</span>
-        <h1>{chapter.title}</h1>
-        <p className="reader-byline">
-          {story.authorName} <span>✦</span> {story.title}
-        </p>
-        {notice && (
-          <div className="notice" role="status">
-            {notice}{' '}
-            <button
-              className="text-link"
-              onClick={() =>
-                document
-                  .getElementById(`paragraph-${anchor.current}`)
-                  ?.scrollIntoView({ behavior: 'smooth' })
-              }
-            >
-              Resume position
-            </button>
-          </div>
-        )}
-        <div className="narrative">
-          {text
-            .split(/\n\s*\n/)
-            .filter(Boolean)
-            .map((p, i) => (
-              <p data-paragraph key={i} id={`paragraph-${i}`}>
-                {p}
-              </p>
-            ))}
-        </div>
-        {!body && (
-          <div className="reading-gate">
-            <Lock size={24} />
-            <h2>
-              {gated
-                ? 'A story for mature readers'
-                : chapter.accessType === 'premium'
-                  ? 'A little more story awaits.'
-                  : 'Keep the story going.'}
-            </h2>
-            <p>
-              {loading
-                ? 'Checking your reading access…'
-                : error ||
-                  (gated
-                    ? 'Sign in and confirm mature content access in your account.'
-                    : 'Create your free account or sign in to read the full chapter.')}
-            </p>
-            {!user ? (
-              <Link className="button" href="/sign-in">
-                Sign in to read <ArrowRight size={16} />
-              </Link>
-            ) : gated && !user.matureConfirmed ? (
-              <Link className="button" href="/account">
-                Content preferences
-              </Link>
-            ) : null}
-          </div>
-        )}
-        <div className="reader-pagination">
-          {chapters[index - 1] ? (
-            <Link
-              className="button secondary"
-              href={`/stories/${story.slug}/chapters/${chapters[index - 1].slug}`}
-            >
-              <ArrowLeft size={16} /> Previous
-            </Link>
+      <ReadingPreferencesPanel key={user?.id ?? 'visitor'} userId={user?.id ?? null}>
+        <article className="reader-article">
+          <span className="eyebrow">CHAPTER {chapter.order}</span>
+          <h1>{chapter.title}</h1>
+          <p className="reader-byline">
+            {story.authorName} <span>✦</span> {story.title}
+          </p>
+          {notice && (
+            <div className="notice" role="status">
+              {notice}{' '}
+              <button
+                className="text-link"
+                onClick={() =>
+                  readerRoot.current
+                    ?.querySelector(`#paragraph-${resumeAnchor.current}`)
+                    ?.scrollIntoView({ behavior: 'smooth' })
+                }
+              >
+                Resume position
+              </button>
+            </div>
+          )}
+          <ChapterNarrative
+            key={`narrative:${user?.id ?? 'visitor'}:${chapter.id}`}
+            text={text}
+            chapterId={chapter.id}
+            authorized={!!body && !!user}
+          />
+          {!body && (loading || (!!user && !error)) ? (
+            <LoadingState label="Opening your chapter…" compact />
           ) : (
-            <span />
+            !body && (
+              <div className="reading-gate">
+                <Lock size={24} />
+                <h2>
+                  {gated
+                    ? 'A story for mature readers'
+                    : chapter.accessType === 'premium'
+                      ? 'A little more story awaits.'
+                      : 'Keep the story going.'}
+                </h2>
+                <p>
+                  {loading
+                    ? 'Checking your reading access…'
+                    : error ||
+                      (gated
+                        ? 'Sign in and confirm mature content access in your account.'
+                        : 'Create your free account or sign in to read the full chapter.')}
+                </p>
+                {!user ? (
+                  <Link className="button" href="/sign-in">
+                    Sign in to read <ArrowRight size={16} />
+                  </Link>
+                ) : gated && !user.matureConfirmed ? (
+                  <Link className="button" href="/account">
+                    Content preferences
+                  </Link>
+                ) : chapter.accessType === 'premium' ? (
+                  <RewardUnlock
+                    key={user.id + chapter.id}
+                    chapterId={chapter.id}
+                    onUnlocked={() => setAccessRevision((value) => value + 1)}
+                  />
+                ) : (
+                  <button
+                    className="button secondary"
+                    onClick={() => setAccessRevision((value) => value + 1)}
+                  >
+                    Retry chapter
+                  </button>
+                )}
+              </div>
+            )
           )}
-          {chapters[index + 1] && (
-            <Link
-              className="button"
-              href={`/stories/${story.slug}/chapters/${chapters[index + 1].slug}`}
-            >
-              Next chapter <ArrowRight size={16} />
-            </Link>
+          {body && user && (
+            <ChapterComments key={`comments:${user.id}:${chapter.id}`} chapterId={chapter.id} />
           )}
-        </div>
-      </article>
+          <div className="reader-pagination">
+            {chapters[index - 1] ? (
+              <Link
+                className="button secondary"
+                href={`/stories/${story.slug}/chapters/${chapters[index - 1].slug}`}
+              >
+                <ArrowLeft size={16} /> Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            {chapters[index + 1] && (
+              <Link
+                className="button"
+                href={`/stories/${story.slug}/chapters/${chapters[index + 1].slug}`}
+              >
+                Next chapter <ArrowRight size={16} />
+              </Link>
+            )}
+          </div>
+        </article>
+      </ReadingPreferencesPanel>
     </div>
   );
 }
