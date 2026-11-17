@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Novel Blast Reader</title>
+  <rect width="64" height="64" rx="14" fill="#18251f"/>
+  <g fill="none" stroke="#d9eab2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 22c-6-5-13-6-22-4v30c9-2 16-1 22 4 6-5 13-6 22-4V18c-9-2-16-1-22 4Z"/>
+    <path d="M32 22v30M17 27c3 0 6 1 9 3M17 35c3 0 6 1 9 3M38 30c3-2 6-3 9-3M38 38c3-2 6-3 9-3"/>
+  </g>
+  <path d="m44 5 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#d9eab2"/>
+</svg>

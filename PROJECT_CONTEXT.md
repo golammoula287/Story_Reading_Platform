@@ -1,5 +1,9 @@
 # Project Context
 
+## Browser icon (2026-11-17)
+
+User requested a logo for the website in the browser. Added `apps/web/src/app/icon.svg`: a green open-book mark with a small spark, matching the existing book branding and accent color. Next.js file-based metadata exposes it as the site icon. SVG XML validation passed. Dependencies are absent in this checkout, so a production build and live browser verification were not run. Redeploy the frontend to publish; domain DNS setup and canonical-origin configuration remain pending. This small requested asset change does not establish Phase 3 completion or milestone acceptance.
+
 Last updated: 2026-10-06.
 
 ## Purpose and current instruction
